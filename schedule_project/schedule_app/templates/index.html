@@ -1,0 +1,27 @@
+<!-- schedule_app/templates/index.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Employee Shifts</title>
+</head>
+<body>
+    <h1>Employee Shifts</h1>
+    <ul>
+        {% for employee in employees %}
+            <li>
+                <strong>Name:</strong> {{ employee.name }}<br>
+                <strong>Phone Number:</strong> {{ employee.phone_number }}<br>
+                <strong>Position:</strong> {{ employee.position }}<br>
+                <strong>Shifts:</strong>
+                <ul>
+                    {% for shift in employee.shifts %}
+                        <li>{{ shift }}</li>
+                    {% endfor %}
+                </ul>
+            </li>
+        {% endfor %}
+    </ul>
+</body>
+</html>
