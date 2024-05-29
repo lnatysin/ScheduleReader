@@ -1,86 +1,303 @@
 import sys
+
+from PyQt5.QtGui import QIcon, QPixmap
 from PyQt5.QtWidgets import (QApplication, QMainWindow, QPushButton, QVBoxLayout, QWidget, QLabel, QStackedLayout,
-                             QLineEdit, QScrollArea)
+                             QLineEdit, QScrollArea, QSpacerItem, QSizePolicy, QComboBox)
+from PyQt5.QtCore import Qt, QSize
 from ScheduleReader.reader import ScheduleReader
 
+TEXTBOX_STYLE = "QLineEdit { border: 1px solid #023047; }"
+SCROLL_AREA_STYLE = "QScrollArea { border: none; }"
 
-class Search_Employee_Window(QWidget):
-    def __init__(self):
+
+# Updated color scheme
+BACKGROUND_COLOR = '#8ecae6'  # Light blue background
+BUTTON_COLOR = '#023047'      # Dark blue buttons
+TEXT_COLOR = '#ffb703'        # Orange text
+HOVER_COLOR = '#219ebc'       # Blue hover effect
+
+# Define the desired font size
+FONT_SIZE = '20pt'
+
+# Updated button style with font size
+BUTTON_STYLE = f"QPushButton {{ background-color: {BUTTON_COLOR}; color: {TEXT_COLOR}; font-size: {FONT_SIZE}; }}"
+BUTTON_HOVER_STYLE = f"QPushButton:hover {{ background-color: {HOVER_COLOR}; }}"
+LABEL_STYLE = "QLabel { color: #023047; font-size: 50px; }"
+
+class Initial_Screen(QMainWindow):
+    def __init__(self, stacked_layout):
         super().__init__()
-        sr = ScheduleReader()
-        sr.add_employees()
+        self.setWindowTitle('Schedule Reader')
+        self.stacked_layout = stacked_layout
         self.initUI()
 
     def initUI(self):
-        self.label = QLabel("Search By Employee", self)
-        self.output_label = QLabel("Output will be shown here", self)  # Label to display output
-        self.textbox = QLineEdit(self)
-        self.enter_button = QPushButton('Enter', self)
-        self.clear_button = QPushButton('Clear', self)
+        self.setStyleSheet(f"background-color: {BACKGROUND_COLOR};")
+        self.button1 = QPushButton("Shifts By Employee Name", self)
+        self.button2 = QPushButton("Shifts by Employee Position", self)
+        self.button3 = QPushButton("Show all Employee Shifts", self)
 
-        # Connect the buttons to their respective functions
-        self.enter_button.clicked.connect(self.displayText)
-        self.clear_button.clicked.connect(self.clearText)
+        # Set button styles
+        self.button1.setStyleSheet(BUTTON_STYLE)
+        self.button2.setStyleSheet(BUTTON_STYLE)
+        self.button3.setStyleSheet(BUTTON_STYLE)
 
+        # Set button icons
+        self.button1.setIcon(QIcon('./images/employee.png'))
+        self.button2.setIcon(QIcon('./images/Position.jpg'))
+        self.button3.setIcon(QIcon('./images/All.jpg'))
+
+        # Set button tooltips
+        self.button1.setToolTip('Enter an employee\'s name to view their shifts.')
+        self.button2.setToolTip('Select a position to see corresponding employee shifts.')
+        self.button3.setToolTip('Click here to display all employee shifts in the system.')
+
+        self.button1.clicked.connect(lambda: self.stacked_layout.setCurrentIndex(1))
+        self.button2.clicked.connect(lambda: self.stacked_layout.setCurrentIndex(2))
+        self.button3.clicked.connect(lambda: self.stacked_layout.setCurrentIndex(3))
+
+        # Set button size
+        button_size = QSize(1000, 200)  # Width, Height
+        self.button1.setFixedSize(button_size)
+        self.button2.setFixedSize(button_size)
+        self.button3.setFixedSize(button_size)
+
+        # Add image label
+        image_label = QLabel(self)
+        image_label.setPixmap(QPixmap('./images/stonewall-golf-color-logo.png'))  # Replace with your image path
+        image_label.setAlignment(Qt.AlignCenter)
+
+        # Adjust layout to include image
         layout = QVBoxLayout()
-        layout.addWidget(self.label)
-        layout.addWidget(self.textbox)
-        layout.addWidget(self.enter_button)
-        layout.addWidget(self.clear_button)
-        layout.addWidget(self.output_label)  # Add the output label to the layout
-        self.setLayout(layout)
+        layout.setSpacing(10)
+        layout.addWidget(image_label, alignment=Qt.AlignCenter)  # Add image label to layout
+        layout.addWidget(self.button1, alignment=Qt.AlignCenter)
+        layout.addWidget(self.button2, alignment=Qt.AlignCenter)
+        layout.addWidget(self.button3, alignment=Qt.AlignCenter)
 
-    def displayText(self):
-        # Get the text from the textbox and display it in the output label
-        entered_text = self.textbox.text()
-        sr = ScheduleReader()
-        sr.add_employees()
-        self.textbox.clear()
-        self.output_label.setText(str(sr.get_shifts_by_employee(entered_text)))
+        # Add description label
+        description_label = QLabel("Schedule Reader: Easily view employee shifts at Stonewall Golf Club.")
+        description_label.setStyleSheet(LABEL_STYLE)
+        layout.addWidget(description_label, alignment=Qt.AlignCenter)
 
-    def clearText(self):
-        # Clear the textbox and the output label when Clear is clicked
-        self.textbox.clear()
-        self.output_label.clear()
+        # Add spacers for better layout
+        layout.addSpacerItem(QSpacerItem(20, 40, QSizePolicy.Minimum, QSizePolicy.Expanding))
+
+        container = QWidget()
+        container.setLayout(layout)
+        self.setCentralWidget(container)
 
 
-
-class Search_Position_Window(QWidget):
-    def __init__(self):
+class BaseScreen(QWidget):
+    def __init__(self, stacked_layout, schedule_reader):
         super().__init__()
+        self.sr = schedule_reader
+        self.stacked_layout = stacked_layout
 
-        self.label = QLabel("Search By Position", self)
-        self.output_label = QLabel("Output will be shown here", self)  # Label to display output
-        self.output_label.setWordWrap(True)  # Enable word wrap
 
-        # Create a scroll area for the output label
+from PyQt5.QtCore import pyqtSignal
+
+
+class ResizableLabel(QLabel):
+    # Define a custom signal
+    textChanged = pyqtSignal(str)
+
+    def __init__(self, parent=None):
+        super(ResizableLabel, self).__init__(parent)
+        self.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
+        self.setAlignment(Qt.AlignCenter)
+
+    def setText(self, text):
+        # Emit the textChanged signal whenever the text is set
+        super(ResizableLabel, self).setText(text)
+        self.textChanged.emit(text)
+
+    def sizeHint(self):
+        # Calculate the size hint based on the content
+        # Set a reasonable maximum width for the label
+        return QSize(2000, 1000)
+
+
+class Search_Employee_Screen(BaseScreen):
+    def __init__(self, stacked_layout, schedule_reader):
+        super().__init__(stacked_layout, schedule_reader)
+
+        # Styling constants
+        SEARCH_BAR_HEIGHT = 60
+        BUTTON_WIDTH = 100
+        FONT_SIZE = 50
+
+        # Set the style for the search bar, buttons, and scroll area
+        self.setStyleSheet("""
+                            QLineEdit {
+                                height: %dpx;
+                                font-size: %dpx;
+                            }
+                            QPushButton {
+                                width: %dpx;
+                                font-size: %dpx;
+                            }
+                            QLabel {
+                                font-size: %dpx;
+                            }
+                        """ % (SEARCH_BAR_HEIGHT, FONT_SIZE, BUTTON_WIDTH, FONT_SIZE, FONT_SIZE))
+        image_label = QLabel(self)
+        image_label.setPixmap(QPixmap('./images/stonewall-golf-color-logo.png'))  # Replace with your image path
+        image_label.setAlignment(Qt.AlignCenter)
+        self.label = QLabel("Search By Employee", self)
+        self.label.setStyleSheet(LABEL_STYLE)
+        self.output_label = QLabel("", self)
+        self.output_label = ResizableLabel(self)
+        self.output_label.setWordWrap(True)
+        self.output_label.setStyleSheet(LABEL_STYLE)
+
+        # Connect the custom signal to the slot
+        self.output_label.textChanged.connect(self.updateScrollAreaSize)
+
         self.scroll_area = QScrollArea(self)
         self.scroll_area.setWidgetResizable(True)
         self.scroll_area.setWidget(self.output_label)
 
         self.textbox = QLineEdit(self)
+        self.textbox.setStyleSheet(TEXTBOX_STYLE)
         self.enter_button = QPushButton('Enter', self)
+        self.enter_button.setStyleSheet(BUTTON_STYLE)
         self.clear_button = QPushButton('Clear', self)
+        self.clear_button.setStyleSheet(BUTTON_STYLE)
 
-        # Connect the buttons to their respective functions
+        self.back_button = QPushButton('Back', self)
+        self.back_button.setStyleSheet(BUTTON_STYLE)
+        self.back_button.setFixedSize(150, 75)  # Width: 150 pixels, Height: 50 pixels
+        self.back_button.clicked.connect(lambda: self.stacked_layout.setCurrentIndex(0))
+
         self.enter_button.clicked.connect(self.displayText)
         self.clear_button.clicked.connect(self.clearText)
 
+        vertical_spacer_top = QSpacerItem(20, 40, QSizePolicy.Minimum, QSizePolicy.Expanding)
+        vertical_spacer_bottom = QSpacerItem(20, 40, QSizePolicy.Minimum, QSizePolicy.Expanding)
+
+        # Adjust layout spacing and margins
         layout = QVBoxLayout()
-        layout.addWidget(self.label)
-        layout.addWidget(self.textbox)
-        layout.addWidget(self.enter_button)
-        layout.addWidget(self.clear_button)
-        layout.addWidget(self.scroll_area)  # Add the scroll area to the layout instead of the label
+        layout.addWidget(image_label, alignment=Qt.AlignCenter)  # Add image label to layout
+        layout.setContentsMargins(20, 20, 20, 20)  # Adjust margins as needed
+        layout.setSpacing(10)  # Reduce spacing to bring elements closer
+
+        # Add widgets and spacers to the layout
+        layout.addWidget(self.label, alignment=Qt.AlignCenter)
+        layout.addWidget(self.textbox, alignment=Qt.AlignCenter)
+        layout.addWidget(self.enter_button, alignment=Qt.AlignCenter)
+        layout.addWidget(self.clear_button, alignment=Qt.AlignCenter)
+        layout.addItem(vertical_spacer_top)  # Add spacer before the scroll area
+        layout.addWidget(self.scroll_area, alignment=Qt.AlignCenter)
+        layout.addItem(vertical_spacer_bottom)  # Add spacer after the scroll area
+
         self.setLayout(layout)
+
+    def updateScrollAreaSize(self):
+        # Update the size policy based on the content size
+        content_size = self.output_label.sizeHint()
+        self.scroll_area.setMinimumSize(content_size.width(), content_size.height())
+
+    def displayText(self):
+        entered_text = self.textbox.text()
+        self.textbox.clear()
+        try:
+            shifts_info = self.sr.get_shifts_by_employee(entered_text)
+            self.output_label.setText(str(shifts_info))
+        except Exception as e:
+            self.output_label.setText("Error: " + str(e))
+
+    def clearText(self):
+        self.textbox.clear()
+        self.output_label.clear()
+
+
+class Search_Position_Screen(BaseScreen):
+    def __init__(self, stacked_layout, schedule_reader):
+        super().__init__(stacked_layout, schedule_reader)
+        # Styling constants
+        SEARCH_BAR_HEIGHT = 60
+        BUTTON_WIDTH = 100
+        FONT_SIZE = 50
+
+        # Set the style for the search bar, buttons, and scroll area
+        self.setStyleSheet("""
+                                    QLineEdit {
+                                        height: %dpx;
+                                        font-size: %dpx;
+                                    }
+                                    QPushButton {
+                                        width: %dpx;
+                                        font-size: %dpx;
+                                    }
+                                    QLabel {
+                                        font-size: %dpx;
+                                    }
+                                """ % (SEARCH_BAR_HEIGHT, FONT_SIZE, BUTTON_WIDTH, FONT_SIZE, FONT_SIZE))
+
+        image_label = QLabel(self)
+        image_label.setPixmap(QPixmap('./images/stonewall-golf-color-logo.png'))  # Replace with your image path
+        image_label.setAlignment(Qt.AlignCenter)
+
+        self.label = QLabel("Search By Position", self)
+        self.label.setStyleSheet(LABEL_STYLE)
+        self.output_label = QLabel("", self)
+        self.output_label = ResizableLabel(self)
+        self.output_label.setWordWrap(True)
+        self.output_label.setStyleSheet(LABEL_STYLE)
+
+        # Connect the custom signal to the slot
+        self.output_label.textChanged.connect(self.updateScrollAreaSize)
+
+        self.scroll_area = QScrollArea(self)
+        self.scroll_area.setWidgetResizable(True)
+        self.scroll_area.setWidget(self.output_label)
+
+        self.combo_box = QComboBox(self)
+        self.combo_box.setStyleSheet(TEXTBOX_STYLE)
+        # Add the four different choices to the combo box
+        self.combo_box.addItems(["GOLF SHOP", "STARTERS/MARSHALS", "CART ATTENDANTS", "BEV CART ATTENDANTS"])
+
+        self.enter_button = QPushButton('Enter', self)
+        self.enter_button.setStyleSheet(BUTTON_STYLE)
+        self.clear_button = QPushButton('Clear', self)
+        self.clear_button.setStyleSheet(BUTTON_STYLE)
+
+        self.back_button = QPushButton('Back', self)
+        self.back_button.setStyleSheet(BUTTON_STYLE)
+        self.back_button.setFixedSize(150, 75)  # Width: 150 pixels, Height: 50 pixels
+        self.back_button.clicked.connect(lambda: self.stacked_layout.setCurrentIndex(0))
+
+        self.enter_button.clicked.connect(self.displayText)
+        self.clear_button.clicked.connect(self.clearText)
+
+        vertical_spacer_top = QSpacerItem(20, 40, QSizePolicy.Minimum, QSizePolicy.Expanding)
+        vertical_spacer_bottom = QSpacerItem(20, 40, QSizePolicy.Minimum, QSizePolicy.Expanding)
+
+        layout = QVBoxLayout()
+        layout.addWidget(image_label, alignment=Qt.AlignCenter)  # Add image label to layout
+        layout.setContentsMargins(20, 20, 20, 20)
+        layout.setSpacing(10)
+
+        # Add widgets and spacers to the layout
+        layout.addWidget(self.label, alignment=Qt.AlignCenter)
+        layout.addWidget(self.combo_box, alignment=Qt.AlignCenter)  # Add the combo box instead of the textbox
+        layout.addWidget(self.enter_button, alignment=Qt.AlignCenter)
+        layout.addWidget(self.clear_button, alignment=Qt.AlignCenter)
+        layout.addItem(vertical_spacer_top)
+        layout.addWidget(self.scroll_area, alignment=Qt.AlignCenter)
+        layout.addItem(vertical_spacer_bottom)
+
+        self.setLayout(layout)
+    def updateScrollAreaSize(self):
+        # Update the size policy based on the content size
+        content_size = self.output_label.sizeHint()
+        self.scroll_area.setMinimumSize(content_size.width(), content_size.height())
 
     def displayText(self):
         # Get the text from the textbox and display it in the output label
-        entered_text = self.textbox.text()
-        sr = ScheduleReader()
-        sr.add_employees()
-        self.textbox.clear()
-        employees = sr.get_shifts_by_position(entered_text)
+        selected_text = self.combo_box.currentText()
+        employees = self.sr.get_shifts_by_position(selected_text)
         output_string = ""
         for employee in employees:
             output_string += str(employee) + "\n"  # Add a newline character for each employee
@@ -91,86 +308,110 @@ class Search_Position_Window(QWidget):
         self.textbox.clear()
         self.output_label.clear()
 
-class All_Employee_Window(QWidget):
-    def __init__(self):
-        super().__init__()
-        sr = ScheduleReader()
-        sr.add_employees()
-        self.label = QLabel("Display All Employees")
-        self.output_label = QLabel("Output will be shown here", self)  # Label to display output
-        self.output_label.setWordWrap(True)  # Enable word wrap
 
-        # Create a scroll area for the output label
+class All_Employee_Screen(BaseScreen):
+    def __init__(self, stacked_layout, schedule_reader):
+        super().__init__(stacked_layout, schedule_reader)
+        # Styling constants
+        SEARCH_BAR_HEIGHT = 60
+        BUTTON_WIDTH = 100
+        FONT_SIZE = 50
+
+        # Set the style for the search bar, buttons, and scroll area
+        self.setStyleSheet("""
+                                            QLineEdit {
+                                                height: %dpx;
+                                                font-size: %dpx;
+                                            }
+                                            QPushButton {
+                                                width: %dpx;
+                                                font-size: %dpx;
+                                            }
+                                            QLabel {
+                                                font-size: %dpx;
+                                            }
+                                        """ % (SEARCH_BAR_HEIGHT, FONT_SIZE, BUTTON_WIDTH, FONT_SIZE, FONT_SIZE))
+
+        image_label = QLabel(self)
+        image_label.setPixmap(QPixmap('./images/stonewall-golf-color-logo.png'))  # Replace with your image path
+        image_label.setAlignment(Qt.AlignCenter)
+
+        self.label = QLabel("Show All Employees", self)
+        self.output_label = QLabel("", self)
+        self.output_label = ResizableLabel(self)
+        self.output_label.setWordWrap(True)
+        self.output_label.setStyleSheet(LABEL_STYLE)
+
+        # Connect the custom signal to the slot
+        self.output_label.textChanged.connect(self.updateScrollAreaSize)
+
+        self.back_button = QPushButton('Back', self)
+        self.back_button.setStyleSheet(BUTTON_STYLE)
+        self.back_button.setFixedSize(150, 75)  # Width: 150 pixels, Height: 50 pixels
+        self.back_button.clicked.connect(lambda: self.stacked_layout.setCurrentIndex(0))
+
         self.scroll_area = QScrollArea(self)
         self.scroll_area.setWidgetResizable(True)
         self.scroll_area.setWidget(self.output_label)
 
+        vertical_spacer_top = QSpacerItem(20, 40, QSizePolicy.Minimum, QSizePolicy.Expanding)
+        vertical_spacer_bottom = QSpacerItem(20, 40, QSizePolicy.Minimum, QSizePolicy.Expanding)
+
+        # Adjust layout spacing and margins
         layout = QVBoxLayout()
-        layout.addWidget(self.label)
-        layout.addWidget(self.scroll_area)  # Add the scroll area to the layout instead of the label
+        layout.addWidget(image_label, alignment=Qt.AlignCenter)  # Add image label to layout
+        layout.setContentsMargins(20, 20, 20, 20)  # Adjust margins as needed
+        layout.setSpacing(10)  # Reduce spacing to bring elements closer
+
+        # Add widgets and spacers to the layout
+        layout.addWidget(self.label, alignment=Qt.AlignCenter)
+        layout.addItem(vertical_spacer_top)  # Add spacer before the scroll area
+        layout.addWidget(self.scroll_area, alignment=Qt.AlignCenter)
+        layout.addItem(vertical_spacer_bottom)  # Add spacer after the scroll area
+
         self.setLayout(layout)
 
         self.displayText()
 
+    def updateScrollAreaSize(self):
+        # Update the size policy based on the content size
+        content_size = self.output_label.sizeHint()
+        self.scroll_area.setMinimumSize(content_size.width(), content_size.height())
+
     def displayText(self):
         # Get the text from the textbox and display it in the output label
-        sr = ScheduleReader()
-        sr.add_employees()
-        employees = sr.get_all_employees()
+        employees = self.sr.get_all_employees()
         output_string = ""
         for employee in employees:
             output_string += str(employee) + "\n"  # Add a newline character for each employee
         self.output_label.setText(output_string)
+
 
 class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
 
-        # Create a stacked layout
+        self.sr = ScheduleReader()
+        self.sr.add_employees()
+
         self.stacked_layout = QStackedLayout()
 
-        # Create instances of the screens
-        self.screen1 = Search_Employee_Window()
-        self.screen2 = Search_Position_Window()
-        self.screen3 = All_Employee_Window()
+        self.setStyleSheet(f"background-color: {BACKGROUND_COLOR};")
 
-        # Add screens to the stacked layout
+        self.screen0 = Initial_Screen(self.stacked_layout)
+        self.screen1 = Search_Employee_Screen(self.stacked_layout, self.sr)
+        self.screen2 = Search_Position_Screen(self.stacked_layout, self.sr)
+        self.screen3 = All_Employee_Screen(self.stacked_layout, self.sr)
+
+        self.stacked_layout.addWidget(self.screen0)
         self.stacked_layout.addWidget(self.screen1)
         self.stacked_layout.addWidget(self.screen2)
         self.stacked_layout.addWidget(self.screen3)
 
-        # Set the central widget to the stacked layout
         self.central_widget = QWidget()
         self.central_widget.setLayout(self.stacked_layout)
         self.setCentralWidget(self.central_widget)
 
-        # Create buttons to switch screens
-        self.button1 = QPushButton("Shifts By Employee Name")
-        self.button2 = QPushButton("Shifts by Employee Position")
-        self.button3 = QPushButton("Show all Employee Shifts")
-
-        # Connect buttons to show the corresponding screens
-        self.button1.clicked.connect(lambda: self.stacked_layout.setCurrentWidget(self.screen1))
-        self.button2.clicked.connect(lambda: self.stacked_layout.setCurrentWidget(self.screen2))
-        self.button3.clicked.connect(lambda: self.stacked_layout.setCurrentWidget(self.screen3))
-
-        # Create a main layout
-        self.main_layout = QVBoxLayout()
-
-        # Add the stacked layout widget to the main layout
-        self.main_layout.addWidget(self.central_widget)
-
-        # Add buttons to the main layout
-        self.main_layout.addWidget(self.button1)
-        self.main_layout.addWidget(self.button2)
-        self.main_layout.addWidget(self.button3)
-
-        # Create a container widget and set the main layout
-        self.container_widget = QWidget()
-        self.container_widget.setLayout(self.main_layout)
-
-        # Set the container widget as the central widget of the window
-        self.setCentralWidget(self.container_widget)
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
