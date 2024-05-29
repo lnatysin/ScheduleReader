@@ -26,9 +26,14 @@ class ScheduleReader:
     def get_shifts_by_employee(self, employee_name):
         for employee in self.employees:
             if employee_name == employee.name:
-                print(employee)
+                return employee
 
     def get_shifts_by_position(self, position):
+        return_employees = []
         for employee in self.employees:
             if employee.position == position:
-                print(employee)
+                return_employees.append(employee)
+        return return_employees
+
+    def get_all_employees(self):
+        return self.employees
