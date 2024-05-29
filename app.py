@@ -254,9 +254,11 @@ class Search_Position_Screen(BaseScreen):
         self.scroll_area.setWidget(self.output_label)
 
         self.combo_box = QComboBox(self)
-        self.combo_box.setStyleSheet(TEXTBOX_STYLE)
+        self.combo_box.setStyleSheet("QComboBox { font-size: 16pt; }" + TEXTBOX_STYLE)
         # Add the four different choices to the combo box
         self.combo_box.addItems(["GOLF SHOP", "STARTERS/MARSHALS", "CART ATTENDANTS", "BEV CART ATTENDANTS"])
+
+        self.combo_box.setFixedSize(600, 100)
 
         self.enter_button = QPushButton('Enter', self)
         self.enter_button.setStyleSheet(BUTTON_STYLE)
