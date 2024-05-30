@@ -13,7 +13,7 @@ SCROLL_AREA_STYLE = "QScrollArea { border: none; }"
 # Updated color scheme
 BACKGROUND_COLOR = '#8ecae6'  # Light blue background
 BUTTON_COLOR = '#023047'      # Dark blue buttons
-TEXT_COLOR = '#ffb703'        # Orange text
+TEXT_COLOR = '#ff8c00'        # Orange text
 HOVER_COLOR = '#219ebc'       # Blue hover effect
 
 # Define the desired font size
@@ -165,7 +165,7 @@ class Search_Employee_Screen(BaseScreen):
         self.clear_button = QPushButton('Clear', self)
         self.clear_button.setStyleSheet(BUTTON_STYLE)
 
-        self.back_button = QPushButton('Back', self)
+        self.back_button = QPushButton('Exit', self)
         self.back_button.setStyleSheet(BUTTON_STYLE)
         self.back_button.setFixedSize(150, 75)  # Width: 150 pixels, Height: 50 pixels
         self.back_button.clicked.connect(lambda: self.stacked_layout.setCurrentIndex(0))
@@ -265,7 +265,7 @@ class Search_Position_Screen(BaseScreen):
         self.clear_button = QPushButton('Clear', self)
         self.clear_button.setStyleSheet(BUTTON_STYLE)
 
-        self.back_button = QPushButton('Back', self)
+        self.back_button = QPushButton('Exit', self)
         self.back_button.setStyleSheet(BUTTON_STYLE)
         self.back_button.setFixedSize(150, 75)  # Width: 150 pixels, Height: 50 pixels
         self.back_button.clicked.connect(lambda: self.stacked_layout.setCurrentIndex(0))
@@ -347,7 +347,7 @@ class All_Employee_Screen(BaseScreen):
         # Connect the custom signal to the slot
         self.output_label.textChanged.connect(self.updateScrollAreaSize)
 
-        self.back_button = QPushButton('Back', self)
+        self.back_button = QPushButton('Exit', self)
         self.back_button.setStyleSheet(BUTTON_STYLE)
         self.back_button.setFixedSize(150, 75)  # Width: 150 pixels, Height: 50 pixels
         self.back_button.clicked.connect(lambda: self.stacked_layout.setCurrentIndex(0))
