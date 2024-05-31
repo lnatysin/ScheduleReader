@@ -1,8 +1,9 @@
 import sys
 
 from PyQt5.QtGui import QIcon, QPixmap
+from PyQt5 import QtWidgets
 from PyQt5.QtWidgets import (QApplication, QMainWindow, QPushButton, QVBoxLayout, QWidget, QLabel, QStackedLayout,
-                             QLineEdit, QScrollArea, QSpacerItem, QSizePolicy, QComboBox)
+                             QLineEdit, QScrollArea, QSpacerItem, QSizePolicy, QComboBox, QDesktopWidget)
 from PyQt5.QtCore import Qt, QSize
 from ScheduleReader.reader import ScheduleReader
 
@@ -24,6 +25,24 @@ BUTTON_STYLE = f"QPushButton {{ background-color: {BUTTON_COLOR}; color: {TEXT_C
 BUTTON_HOVER_STYLE = f"QPushButton:hover {{ background-color: {HOVER_COLOR}; }}"
 LABEL_STYLE = "QLabel { color: #023047; font-size: 50px; }"
 
+from screeninfo import get_monitors
+
+# Get screen size
+monitor = get_monitors()[0]
+screen_width = monitor.width
+screen_height = monitor.height
+
+# Calculate button size based on screen size
+button_width = int(screen_width * 0.5)  # 50% of screen width
+button_height = int(screen_height * 0.1)  # 10% of screen height
+button_size = QSize(button_width, button_height)
+
+other_button_width = int(screen_width * 0.1)  # 50% of screen width
+other_button_height = int(screen_height * 0.05)  # 10% of screen height
+other_button_size = QSize(other_button_width, other_button_height)
+
+scroll_width = int(screen_width * 0.5)
+scroll_height = int(screen_height * 0.1)
 class Initial_Screen(QMainWindow):
     def __init__(self, stacked_layout):
         super().__init__()
@@ -57,7 +76,6 @@ class Initial_Screen(QMainWindow):
         self.button3.clicked.connect(lambda: self.stacked_layout.setCurrentIndex(3))
 
         # Set button size
-        button_size = QSize(1000, 200)  # Width, Height
         self.button1.setFixedSize(button_size)
         self.button2.setFixedSize(button_size)
         self.button3.setFixedSize(button_size)
@@ -87,7 +105,6 @@ class Initial_Screen(QMainWindow):
         container.setLayout(layout)
         self.setCentralWidget(container)
 
-
 class BaseScreen(QWidget):
     def __init__(self, stacked_layout, schedule_reader):
         super().__init__()
@@ -115,7 +132,7 @@ class ResizableLabel(QLabel):
     def sizeHint(self):
         # Calculate the size hint based on the content
         # Set a reasonable maximum width for the label
-        return QSize(2000, 1000)
+        return QSize(scroll_width, scroll_height)
 
 
 class Search_Employee_Screen(BaseScreen):
@@ -162,8 +179,10 @@ class Search_Employee_Screen(BaseScreen):
         self.textbox.setStyleSheet(TEXTBOX_STYLE)
         self.enter_button = QPushButton('Enter', self)
         self.enter_button.setStyleSheet(BUTTON_STYLE)
+        self.enter_button.setFixedSize(other_button_size)
         self.clear_button = QPushButton('Clear', self)
         self.clear_button.setStyleSheet(BUTTON_STYLE)
+        self.clear_button.setFixedSize(other_button_size)
 
         self.back_button = QPushButton('Exit', self)
         self.back_button.setStyleSheet(BUTTON_STYLE)
@@ -258,7 +277,7 @@ class Search_Position_Screen(BaseScreen):
         # Add the four different choices to the combo box
         self.combo_box.addItems(["GOLF SHOP", "STARTERS/MARSHALS", "CART ATTENDANTS", "BEV CART ATTENDANTS"])
 
-        self.combo_box.setFixedSize(600, 100)
+        self.combo_box.setFixedSize(other_button_size)
 
         self.enter_button = QPushButton('Enter', self)
         self.enter_button.setStyleSheet(BUTTON_STYLE)
