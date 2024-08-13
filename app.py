@@ -5,7 +5,7 @@ from PyQt5 import QtWidgets
 from PyQt5.QtWidgets import (QApplication, QMainWindow, QPushButton, QVBoxLayout, QWidget, QLabel, QStackedLayout,
                              QLineEdit, QScrollArea, QSpacerItem, QSizePolicy, QComboBox, QDesktopWidget)
 from PyQt5.QtCore import Qt, QSize
-from ScheduleReader.reader import ScheduleReader
+from reader import ScheduleReader
 
 TEXTBOX_STYLE = "QLineEdit { border: 1px solid #023047; }"
 SCROLL_AREA_STYLE = "QScrollArea { border: none; }"
@@ -42,7 +42,7 @@ other_button_height = int(screen_height * 0.05)  # 10% of screen height
 other_button_size = QSize(other_button_width, other_button_height)
 
 scroll_width = int(screen_width * 0.5)
-scroll_height = int(screen_height * 0.1)
+scroll_height = int(screen_height * 0.5)
 class Initial_Screen(QMainWindow):
     def __init__(self, stacked_layout):
         super().__init__()

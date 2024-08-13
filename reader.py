@@ -1,10 +1,10 @@
 import pandas as pd
-from ScheduleReader.employee import Employee
+from employee import Employee
 
 
 class ScheduleReader:
     def __init__(self):
-        self.df = pd.read_excel('Schedule.xlsx', sheet_name='Sheet1', engine='openpyxl')
+        self.df = pd.read_excel('./Schedule.xlsx', sheet_name='Sheet1', engine='openpyxl')
         self.employees = []
         self.add_employees()
 
